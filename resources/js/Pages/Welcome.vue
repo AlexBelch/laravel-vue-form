@@ -1,26 +1,10 @@
 <script setup>
 import { Head, Link } from "@inertiajs/vue3";
-
-// defineProps({
-//     canLogin: {
-//         type: Boolean,
-//     },
-//     canRegister: {
-//         type: Boolean,
-//     },
-//     laravelVersion: {
-//         type: String,
-//         required: true,
-//     },
-//     phpVersion: {
-//         type: String,
-//         required: true,
-//     },
-// });
+import FormTravel from "@/Components/FormTravel.vue";
 </script>
 
 <template>
-    <Head title="Welcome" />
+    <Head title="Anfrageformular" />
 
-    <div>Welcome</div>
+    <FormTravel />
 </template>
