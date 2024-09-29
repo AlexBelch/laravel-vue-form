@@ -2,6 +2,8 @@
 *::before,
 *::after {
     box-sizing: border-box;
+    border-width: 0;
+    border-style: solid;
 }
 
 * {
@@ -43,5 +45,231 @@ html {
 }
 
 body {
-    
+    .form-traver-wrap {
+        background: var(--beige);
+        padding: 10px 100px 50px 50px;
+
+        .form-group {
+            .form-group-title {
+                font-family: var(--font-family-headline);
+                font-size: var(--font-size-headline-desktop);
+                color: var(--red);
+            }
+
+            .form-group-container {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding-top: 10px;
+                padding-bottom: 10px;
+
+                .form-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 50px;
+
+                    .form-row-label {
+                        font-family: var(--font-family-bodytext);
+                        font-size: var(--font-size-bodytext-desktop);
+                        font-weight: bold;
+                        flex: 1 1 0;
+                        text-align: end;
+                    }
+
+                    .form-row-container {
+                        flex: 2 1 0;
+                        position: relative;
+
+                        [type="text"],
+                        input:where(:not([type])),
+                        [type="email"],
+                        [type="url"],
+                        [type="password"],
+                        [type="number"],
+                        [type="date"],
+                        [type="datetime-local"],
+                        [type="month"],
+                        [type="search"],
+                        [type="tel"],
+                        [type="time"],
+                        [type="week"],
+                        [multiple],
+                        textarea,
+                        select {
+                            -webkit-appearance: none;
+                            -moz-appearance: none;
+                            appearance: none;
+                            background-color: #fff;
+                            border-width: 1px;
+                            padding-top: 0.5rem;
+                            padding-right: 0.75rem;
+                            padding-bottom: 0.5rem;
+                            padding-left: 0.75rem;
+                            font-size: 1rem;
+                            line-height: 1.5rem;
+                        }
+
+                        [type="text"]:focus,
+                        input:where(:not([type])):focus,
+                        [type="email"]:focus,
+                        [type="url"]:focus,
+                        [type="password"]:focus,
+                        [type="number"]:focus,
+                        [type="date"]:focus,
+                        [type="datetime-local"]:focus,
+                        [type="month"]:focus,
+                        [type="search"]:focus,
+                        [type="tel"]:focus,
+                        [type="time"]:focus,
+                        [type="week"]:focus,
+                        [multiple]:focus,
+                        textarea:focus,
+                        select:focus {
+                            border-color: var(--red);
+                            border-width: 0;
+                            outline: var(--red) solid 1px;
+                        }
+
+                        input {
+                            font-family: var(--font-family-bodytext);
+                            width: 100%;
+                            border-radius: 5px;
+                            border-color: lightgray;
+                        }
+
+                        .form-input-error {
+                            border-color: #bb1238;
+                            border-width: medium;
+                        }
+                    }
+                }
+            }
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+
+            .button-primary {
+                font-family: "Overlock";
+                font-size: 14px;
+                font-weight: bold;
+                text-transform: uppercase;
+                height: 50px;
+                width: 150px;
+                color: white;
+                background: var(--red);
+                border-radius: 0;
+                margin-top: 10px;
+                padding: 2px 20px;
+
+                &:focus {
+                    box-shadow: 0 0 0 3px rgb(168 45 35 / 0.3);
+                }
+            }
+        }
+    }
+
+    .flatpickr {
+        .input-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+
+            svg {
+                fill: var(--red);
+
+                path {
+                    fill: var(--red);
+                }
+            }
+        }
+    }
+
+    .flatpickr-calendar {
+        .flatpickr-month {
+            background-color: white;
+
+            .cur-month,
+            .cur-year {
+                color: #e6ba68;
+            }
+
+            .flatpickr-current-month {
+                .flatpickr-monthDropdown-months {
+                    background: white;
+                    color: #e6ba68;
+
+                    .flatpickr-monthDropdown-month {
+                        background-color: white;
+                    }
+                }
+            }
+        }
+
+        .flatpickr-months .flatpickr-prev-month,
+        .flatpickr-months .flatpickr-next-month {
+            color: black;
+            fill: black;
+        }
+
+        .flatpickr-weekdays {
+            background-color: white;
+
+            .flatpickr-weekday {
+                background: white;
+            }
+        }
+
+        .flatpickr-days {
+            .startRange,
+            .endRange {
+                background-color: #e3b256;
+                border-color: #e3b256;
+            }
+
+            .inRange {
+                background-color: #f6deae;
+                border-color: #f6deae;
+                -webkit-box-shadow:
+                    -5px 0 0 #f6deae,
+                    5px 0 0 #f6deae;
+                box-shadow:
+                    -5px 0 0 #f6deae,
+                    5px 0 0 #f6deae;
+            }
+
+            .flatpickr-day:hover,
+            .flatpickr-day:focus {
+                background-color: white;
+                border: 1px solid #e6ba68;
+                color: #e6ba68;
+            }
+
+            .flatpickr-day.selected.startRange
+                + .endRange:not(:nth-child(7n + 1)),
+            .flatpickr-day.startRange.startRange
+                + .endRange:not(:nth-child(7n + 1)),
+            .flatpickr-day.endRange.startRange
+                + .endRange:not(:nth-child(7n + 1)) {
+                -webkit-box-shadow: -10px 0 0 #e3b256;
+                box-shadow: -10px 0 0 #e3b256;
+                border: none;
+            }
+        }
+    }
+
+    .flatpickr-calendar.multiMonth
+        .flatpickr-days
+        .dayContainer:nth-child(n + 2)
+        .flatpickr-day.inRange:nth-child(7n + 1) {
+        -webkit-box-shadow:
+            -2px 0 0 #f6deae,
+            5px 0 0 #f6deae;
+        box-shadow:
+            -2px 0 0 #f6deae,
+            5px 0 0 #f6deae;
+        border: none;
+    }
 }
