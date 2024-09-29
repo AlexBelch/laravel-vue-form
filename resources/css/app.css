@@ -1,1 +1,47 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
 
+* {
+    margin: 0;
+}
+
+@font-face {
+    font-family: "Sansita Swashed";
+    src: url("../fonts/SansitaSwashed-Regular.ttf");
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: Overlock;
+    src: url("../fonts/Overlock-Regular.ttf");
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+}
+
+:root {
+    --font-family-headline: "Sansita Swashed";
+    --font-family-bodytext: Overlock;
+    --font-size-headline-desktop: 32px;
+    --font-size-bodytext-desktop: 18px;
+    --font-size-headline-mobile: 28px;
+    --font-size-bodytext-mobile: 17px;
+}
+
+:root {
+    --beige: #f9f6f1;
+    --red: #aa2e24;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    
+}
