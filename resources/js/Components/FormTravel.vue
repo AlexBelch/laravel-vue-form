@@ -1,12 +1,22 @@
 <script setup>
-import {
-    Form,
-    Field,
-    ErrorMessage,
-    configure,
-    validate,
-    FieldArray,
-} from "vee-validate";
+const MONTHS = [
+    "Jan.",
+    "Feb.",
+    "Mär.",
+    "Apr.",
+    "Mai",
+    "Jun.",
+    "Jul.",
+    "Aug.",
+    "Sep.",
+    "Okt.",
+    "Nov",
+    "Dez.",
+];
+const START_YEAR = 1920;
+const CURRENT_YEAR = new Date().getFullYear();
+
+import { Form, Field, ErrorMessage, configure } from "vee-validate";
 import * as yup from "yup";
 import { onMounted, ref } from "vue";
 import flatpickr from "flatpickr";
@@ -23,6 +33,10 @@ const form = ref(null);
 const formData = ref({
     travel_period: "",
     number_adults: undefined,
+    child_name1: "",
+    datebirth_date1: undefined,
+    datebirth_month1: "",
+    datebirth_year1: undefined,
 });
 
 const schema = yup.object().shape({
@@ -36,6 +50,19 @@ const schema = yup.object().shape({
         .moreThan(0)
         .required("Geben Sie eine positive Zahl ein.")
         .typeError("Geben Sie eine positive Zahl ein."),
+    child_name1: yup.string().required("Geben Sie eine Name ein."),
+    datebirth_date1: yup
+        .number()
+        .required("Geben Sie ein Tag ein.")
+        .typeError("Geben Sie ein Tag ein."),
+    datebirth_month1: yup
+        .number()
+        .required("Geben Sie ein Monat ein.")
+        .typeError("Geben Sie ein Monat ein."),
+    datebirth_year1: yup
+        .number()
+        .required("Geben Sie ein Jahr ein.")
+        .typeError("Geben Sie ein Jahr ein."),
 });
 
 onMounted(() => {
@@ -197,7 +224,122 @@ function onSubmitForm(values) {
                     </div>
                 </div>
             </div>
+            <div class="form-group">
+                <div class="form-group-title">Kinder</div>
+                <div class="form-group-subtitle">
+                    Als Familienspezialist ist es uns wichtig, Ihnen ein
+                    maßgeschneidertes Angebot zu übermitteln. Bitte geben Sie
+                    uns daher den Vornamen und Das Alter Ihrer Kinder/Ihres
+                    Kindes an.
+                </div>
 
+                <div class="form-group-container">
+                    <div class="form-row">
+                        <label class="form-row-label" for="child_name1"
+                            >Name des Kindes *
+                        </label>
+                        <div class="form-row-container">
+                            <Field
+                                type="text"
+                                id="child_name1"
+                                name="child_name1"
+                                v-model.lazy="formData.child_name1"
+                                :class="
+                                    form?.errors?.child_name1
+                                        ? 'form-input-error'
+                                        : ''
+                                "
+                                required
+                                data-input
+                            />
+                            <ErrorMessage name="child_name1" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row-label" :for="datebirth_date1"
+                            >Geburtstag *</label
+                        >
+                        <div class="form-row-container">
+                            <div class="form-row-date-container">
+                                <Field
+                                    as="select"
+                                    id="datebirth_date1"
+                                    name="datebirth_date1"
+                                    v-model.lazy="formData.datebirth_date1"
+                                    required
+                                    :class="
+                                        form?.errors?.datebirth_date1
+                                            ? 'form-input-error'
+                                            : ''
+                                    "
+                                >
+                                    <option value="" disabled>Tag</option>
+                                    <option v-for="n in 31" :key="n" :value="n">
+                                        {{ n }}
+                                    </option>
+                                </Field>
+                                <Field
+                                    as="select"
+                                    name="datebirth_month1"
+                                    v-model.lazy="formData.datebirth_month1"
+                                    required
+                                    :class="
+                                        form?.errors?.datebirth_month1
+                                            ? 'form-input-error'
+                                            : ''
+                                    "
+                                >
+                                    <option :key="0" value="" disabled>
+                                        Monat
+                                    </option>
+                                    <option
+                                        v-for="(month, index) in MONTHS"
+                                        :key="index"
+                                        :value="index"
+                                    >
+                                        {{ month }}
+                                    </option>
+                                </Field>
+                                <Field
+                                    as="select"
+                                    name="datebirth_year1"
+                                    v-model.lazy="formData.datebirth_year1"
+                                    required
+                                    :class="
+                                        form?.errors?.datebirth_year1
+                                            ? 'form-input-error'
+                                            : ''
+                                    "
+                                >
+                                    <option value="" disabled>Jahr</option>
+                                    <option
+                                        v-for="year in CURRENT_YEAR -
+                                        START_YEAR +
+                                        1"
+                                        :key="CURRENT_YEAR - year + 1"
+                                        :value="CURRENT_YEAR - year + 1"
+                                    >
+                                        {{ CURRENT_YEAR - year + 1 }}
+                                    </option>
+                                </Field>
+                            </div>
+                            <ErrorMessage name="datebirth_date1" />
+                            <ErrorMessage name="datebirth_month1" />
+                            <ErrorMessage name="datebirth_year1" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row-kinder-links-container">
+                    <button type="button" class="btn-increase">
+                        Kind hinzufügen
+                    </button>
+                    <span>&#8594;</span>
+                    <button type="button" class="btn-decrease">
+                        Kind entfernen
+                    </button>
+                </div>
+            </div>
             <div class="button-container">
                 <button class="button-primary" id="btnSubmit" type="submit">
                     Anfrage absenden
