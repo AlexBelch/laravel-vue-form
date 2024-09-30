@@ -16,7 +16,13 @@ const MONTHS = [
 const START_YEAR = 1920;
 const CURRENT_YEAR = new Date().getFullYear();
 
-import { Form, Field, ErrorMessage, configure } from "vee-validate";
+import {
+    Form,
+    Field,
+    FieldArray,
+    ErrorMessage,
+    configure,
+} from "vee-validate";
 import * as yup from "yup";
 import { onMounted, ref } from "vue";
 import flatpickr from "flatpickr";
@@ -35,10 +41,20 @@ const form = ref(null);
 const formData = ref({
     travel_period: "",
     number_adults: undefined,
-    child_name1: "",
-    datebirth_date1: undefined,
-    datebirth_month1: "",
-    datebirth_year1: undefined,
+    childrens: [
+        {
+            name: "",
+            datebirth_date: undefined,
+            datebirth_month: "",
+            datebirth_year: undefined,
+        },
+        {
+            name: "",
+            datebirth_date: undefined,
+            datebirth_month: "",
+            datebirth_year: undefined,
+        },
+    ],
     first_name: "",
     last_name: "",
     gender: "",
@@ -64,19 +80,23 @@ const schema = yup.object().shape({
         .moreThan(0)
         .required("Geben Sie eine positive Zahl ein.")
         .typeError("Geben Sie eine positive Zahl ein."),
-    child_name1: yup.string().required("Geben Sie eine Name ein."),
-    datebirth_date1: yup
-        .number()
-        .required("Geben Sie ein Tag ein.")
-        .typeError("Geben Sie ein Tag ein."),
-    datebirth_month1: yup
-        .number()
-        .required("Geben Sie ein Monat ein.")
-        .typeError("Geben Sie ein Monat ein."),
-    datebirth_year1: yup
-        .number()
-        .required("Geben Sie ein Jahr ein.")
-        .typeError("Geben Sie ein Jahr ein."),
+    childrens: yup.array().of(
+        yup.object({
+            name: yup.string().required("Geben Sie eine Name ein."),
+            datebirth_date: yup
+                .number()
+                .required("Geben Sie ein Tag ein.")
+                .typeError("Geben Sie ein Tag ein."),
+            datebirth_month: yup
+                .number()
+                .required("Geben Sie ein Monat ein.")
+                .typeError("Geben Sie ein Monat ein."),
+            datebirth_year: yup
+                .number()
+                .required("Geben Sie ein Jahr ein.")
+                .typeError("Geben Sie ein Jahr ein."),
+        }),
+    ),
     first_name: yup.string().required("Geben Sie einen gültigen Vornamen ein."),
     last_name: yup.string().required("Geben Sie einen gültigen Nachnamen ein."),
     gender: yup.string().required("Fülle dieses Feld aus."),
@@ -130,11 +150,37 @@ function onSubmitForm(values) {
     console.log(values);
     resetForm();
 }
+
+function onInvalidSubmit({ values, errors, results }) {
+    console.log(values); // current form values
+    console.log(errors); // a map of field names and their first error message
+    //   console.log(results); // a detailed map of field names and their validation results
+
+    document.getElementById("btnSubmit")?.scrollIntoView();
+}
+
+function addChild(formData) {
+    formData?.childrens?.push({
+        name: "",
+        datebirth_date: undefined,
+        datebirth_month: "",
+        datebirth_year: undefined,
+    });
+}
+
+function removeChild(formData) {
+    formData?.childrens?.pop();
+}
 </script>
 
 <template>
     <div class="form-traver-wrap">
-        <Form ref="form" :validation-schema="schema" @submit="onSubmitForm">
+        <Form
+            ref="form"
+            :validation-schema="schema"
+            @submit="onSubmitForm"
+            @invalid-submit="onInvalidSubmit"
+        >
             <div class="form-group">
                 <div class="form-group-title sansita-swashed-regular">
                     Ihre Urlaubsdaten
@@ -149,15 +195,16 @@ function onSubmitForm(values) {
                                 type="text"
                                 id="travelperiod"
                                 name="travel_period"
-                                placeholder="select period"
                                 v-model="formData.travel_period"
-                                required
-                                data-input
                                 :class="
                                     form?.errors?.travel_period
                                         ? 'form-input-error'
                                         : ''
                                 "
+                                minLength="25"
+                                maxLength="25"
+                                required
+                                data-input
                             />
                             <a class="input-button" title="toggle" data-toggle>
                                 <svg
@@ -252,14 +299,14 @@ function onSubmitForm(values) {
                                 name="number_adults"
                                 placeholder=""
                                 v-model.lazy="formData.number_adults"
-                                required
-                                min="1"
-                                pattern="\d+"
                                 :class="
                                     form?.errors?.number_adults
                                         ? 'form-input-error'
                                         : ''
                                 "
+                                required
+                                min="1"
+                                pattern="\d+"
                             />
                             <ErrorMessage name="number_adults" />
                         </div>
@@ -275,109 +322,163 @@ function onSubmitForm(values) {
                     Kindes an.
                 </div>
 
-                <div class="form-group-container">
-                    <div class="form-row">
-                        <label class="form-row-label" for="child_name1"
-                            >Name des Kindes *
-                        </label>
-                        <div class="form-row-container">
-                            <Field
-                                type="text"
-                                id="child_name1"
-                                name="child_name1"
-                                v-model.lazy="formData.child_name1"
-                                :class="
-                                    form?.errors?.child_name1
-                                        ? 'form-input-error'
-                                        : ''
-                                "
-                                required
-                                data-input
-                            />
-                            <ErrorMessage name="child_name1" />
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <label class="form-row-label" :for="datebirth_date1"
-                            >Geburtstag *</label
-                        >
-                        <div class="form-row-container">
-                            <div class="form-row-date-container">
+                <FieldArray name="childrens">
+                    <div
+                        class="form-group-container"
+                        v-for="(children, idx) in formData.childrens"
+                        :key="children.key"
+                    >
+                        <div class="form-row">
+                            <label
+                                class="form-row-label"
+                                :for="`childrens[${idx}].name`"
+                                >Name des Kindes *</label
+                            >
+                            <div class="form-row-container">
                                 <Field
-                                    as="select"
-                                    id="datebirth_date1"
-                                    name="datebirth_date1"
-                                    v-model.lazy="formData.datebirth_date1"
-                                    required
+                                    type="text"
+                                    :id="`childrens[${idx}].name`"
+                                    :name="`childrens[${idx}].name`"
+                                    v-model.lazy="formData.childrens[idx].name"
                                     :class="
-                                        form?.errors?.datebirth_date1
+                                        form?.errors?.[`childrens[${idx}].name`]
                                             ? 'form-input-error'
                                             : ''
                                     "
-                                >
-                                    <option value="" disabled>Tag</option>
-                                    <option v-for="n in 31" :key="n" :value="n">
-                                        {{ n }}
-                                    </option>
-                                </Field>
-                                <Field
-                                    as="select"
-                                    name="datebirth_month1"
-                                    v-model.lazy="formData.datebirth_month1"
                                     required
-                                    :class="
-                                        form?.errors?.datebirth_month1
-                                            ? 'form-input-error'
-                                            : ''
-                                    "
-                                >
-                                    <option :key="0" value="" disabled>
-                                        Monat
-                                    </option>
-                                    <option
-                                        v-for="(month, index) in MONTHS"
-                                        :key="index"
-                                        :value="index"
-                                    >
-                                        {{ month }}
-                                    </option>
-                                </Field>
-                                <Field
-                                    as="select"
-                                    name="datebirth_year1"
-                                    v-model.lazy="formData.datebirth_year1"
-                                    required
-                                    :class="
-                                        form?.errors?.datebirth_year1
-                                            ? 'form-input-error'
-                                            : ''
-                                    "
-                                >
-                                    <option value="" disabled>Jahr</option>
-                                    <option
-                                        v-for="year in CURRENT_YEAR -
-                                        START_YEAR +
-                                        1"
-                                        :key="CURRENT_YEAR - year + 1"
-                                        :value="CURRENT_YEAR - year + 1"
-                                    >
-                                        {{ CURRENT_YEAR - year + 1 }}
-                                    </option>
-                                </Field>
+                                />
+                                <ErrorMessage
+                                    :name="`childrens[${idx}].name`"
+                                />
                             </div>
-                            <ErrorMessage name="datebirth_date1" />
-                            <ErrorMessage name="datebirth_month1" />
-                            <ErrorMessage name="datebirth_year1" />
+                        </div>
+                        <div class="form-row">
+                            <label
+                                class="form-row-label"
+                                :for="`childrens[${idx}].datebirth_date`"
+                                >Geburtstag *</label
+                            >
+                            <div class="form-row-container">
+                                <div class="form-row-date-container">
+                                    <div class="form-row-date-field-wrap">
+                                        <Field
+                                            as="select"
+                                            :id="`childrens[${idx}].datebirth_date`"
+                                            :name="`childrens[${idx}].datebirth_date`"
+                                            v-model.lazy="
+                                                formData.childrens[idx]
+                                                    .datebirth_date
+                                            "
+                                            :class="
+                                                form?.errors?.[
+                                                    `childrens[${idx}].datebirth_date`
+                                                ]
+                                                    ? 'form-input-error'
+                                                    : ''
+                                            "
+                                            required
+                                        >
+                                            <option value="" disabled>
+                                                Tag
+                                            </option>
+                                            <option
+                                                v-for="n in 31"
+                                                :key="n"
+                                                :value="n"
+                                            >
+                                                {{ n }}
+                                            </option>
+                                        </Field>
+                                        <ErrorMessage
+                                            :name="`childrens[${idx}].datebirth_date`"
+                                        />
+                                    </div>
+                                    <div class="form-row-date-field-wrap">
+                                        <Field
+                                            as="select"
+                                            :name="`childrens[${idx}].datebirth_month`"
+                                            v-model.lazy="
+                                                formData.childrens[idx]
+                                                    .datebirth_month
+                                            "
+                                            :class="
+                                                form?.errors?.[
+                                                    `childrens[${idx}].datebirth_month`
+                                                ]
+                                                    ? 'form-input-error'
+                                                    : ''
+                                            "
+                                            required
+                                        >
+                                            <option :key="0" value="" disabled>
+                                                Monat
+                                            </option>
+                                            <option
+                                                v-for="(month, index) in MONTHS"
+                                                :key="index"
+                                                :value="index"
+                                            >
+                                                {{ month }}
+                                            </option>
+                                        </Field>
+                                        <ErrorMessage
+                                            :name="`childrens[${idx}].datebirth_month`"
+                                        />
+                                    </div>
+                                    <div class="form-row-date-field-wrap">
+                                        <Field
+                                            as="select"
+                                            :name="`childrens[${idx}].datebirth_year`"
+                                            v-model.lazy="
+                                                formData.childrens[idx]
+                                                    .datebirth_year
+                                            "
+                                            :class="
+                                                form?.errors?.[
+                                                    `childrens[${idx}].datebirth_year`
+                                                ]
+                                                    ? 'form-input-error'
+                                                    : ''
+                                            "
+                                            required
+                                        >
+                                            <option value="" disabled>
+                                                Jahr
+                                            </option>
+                                            <option
+                                                v-for="year in CURRENT_YEAR -
+                                                START_YEAR +
+                                                1"
+                                                :key="CURRENT_YEAR - year + 1"
+                                                :value="CURRENT_YEAR - year + 1"
+                                            >
+                                                {{ CURRENT_YEAR - year + 1 }}
+                                            </option>
+                                        </Field>
+                                        <ErrorMessage
+                                            :name="`childrens[${idx}].datebirth_year`"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </FieldArray>
 
                 <div class="form-row-kinder-links-container">
-                    <button type="button" class="btn-increase">
+                    <button
+                        @click="addChild(formData)"
+                        type="button"
+                        class="btn-increase"
+                    >
                         Kind hinzufügen
                     </button>
                     <span>&#8594;</span>
-                    <button type="button" class="btn-decrease">
+                    <button
+                        @click="removeChild(formData)"
+                        type="button"
+                        class="btn-decrease"
+                    >
                         Kind entfernen
                     </button>
                 </div>
@@ -395,13 +496,12 @@ function onSubmitForm(values) {
                                 id="firstname"
                                 name="first_name"
                                 v-model="formData.first_name"
-                                required
-                                data-input
                                 :class="
                                     form?.errors?.first_name
                                         ? 'form-input-error'
                                         : ''
                                 "
+                                required
                             />
                             <ErrorMessage name="first_name" />
                         </div>
@@ -416,13 +516,12 @@ function onSubmitForm(values) {
                                 id="lastname"
                                 name="last_name"
                                 v-model="formData.last_name"
-                                required
-                                data-input
                                 :class="
                                     form?.errors?.last_name
                                         ? 'form-input-error'
                                         : ''
                                 "
+                                required
                             />
                             <ErrorMessage name="last_name" />
                         </div>
@@ -437,12 +536,12 @@ function onSubmitForm(values) {
                                 id="gender"
                                 name="gender"
                                 v-model="formData.gender"
-                                required
                                 :class="
                                     form?.errors?.gender
                                         ? 'form-input-error'
                                         : ''
                                 "
+                                required
                             >
                                 <option value="" disabled>Auswählen</option>
                                 <option value="men">Männlich</option>
@@ -457,17 +556,16 @@ function onSubmitForm(values) {
                         >
                         <div class="form-row-container">
                             <Field
-                                type="text"
+                                type="email"
                                 id="email"
                                 name="email"
-                                placeholder=""
                                 v-model.lazy="formData.email"
-                                required
                                 :class="
                                     form?.errors?.email
                                         ? 'form-input-error'
                                         : ''
                                 "
+                                required
                             />
                             <ErrorMessage name="email" />
                         </div>
@@ -481,14 +579,13 @@ function onSubmitForm(values) {
                                 as="select"
                                 id="country"
                                 name="country"
-                                placeholder=""
                                 v-model.lazy="formData.country"
-                                required
                                 :class="
                                     form?.errors?.country
                                         ? 'form-input-error'
                                         : ''
                                 "
+                                required
                             >
                                 <option value="" disabled>Auswählen</option>
                                 <option key="DE" value="Duetschland">
@@ -521,12 +618,11 @@ function onSubmitForm(values) {
                                 type="text"
                                 id="zip"
                                 name="zip"
-                                placeholder=""
                                 v-model.lazy="formData.zip"
-                                required
                                 :class="
                                     form?.errors?.zip ? 'form-input-error' : ''
                                 "
+                                required
                             />
                             <ErrorMessage name="zip" />
                         </div>
@@ -538,12 +634,11 @@ function onSubmitForm(values) {
                                 type="text"
                                 id="city"
                                 name="city"
-                                placeholder=""
                                 v-model.lazy="formData.city"
-                                required
                                 :class="
                                     form?.errors?.city ? 'form-input-error' : ''
                                 "
+                                required
                             />
                             <ErrorMessage name="city" />
                         </div>
@@ -557,14 +652,13 @@ function onSubmitForm(values) {
                                 type="text"
                                 id="street"
                                 name="street"
-                                placeholder=""
                                 v-model.lazy="formData.street"
-                                required
                                 :class="
                                     form?.errors?.street
                                         ? 'form-input-error'
                                         : ''
                                 "
+                                required
                             />
                             <ErrorMessage name="street" />
                         </div>
@@ -575,10 +669,9 @@ function onSubmitForm(values) {
                         >
                         <div class="form-row-container">
                             <Field
-                                type="text"
+                                type="tel"
                                 id="phone"
                                 name="phone_number"
-                                placeholder=""
                                 v-model.lazy="formData.phone_number"
                                 :class="
                                     form?.errors?.phone_number
@@ -598,7 +691,6 @@ function onSubmitForm(values) {
                                 as="textarea"
                                 id="questions_wishes"
                                 name="questions_wishes"
-                                placeholder=""
                                 v-model.lazy="formData.questions_wishes"
                                 rows="4"
                             />
