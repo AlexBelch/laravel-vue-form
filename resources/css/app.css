@@ -206,6 +206,27 @@ body {
             }
         }
 
+        .form-error-container {
+            background-color: #bb1238;
+            color: white;
+            text-align: center;
+            padding: 24px;
+
+            .form-error-text {
+                font-family: var(--font-family-headline);
+                font-size: var(--font-size-bodytext-desktop);
+                font-weight: bold;
+                font-style: italic;
+            }
+
+            .form-error-tipp {
+                font-family: var(--font-family-bodytext);
+                font-size: 14px;
+                font-weight: bold;
+                margin-top: 10px;
+            }
+        }
+
         .button-container {
             display: flex;
             justify-content: center;
