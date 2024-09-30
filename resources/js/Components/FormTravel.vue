@@ -99,6 +99,14 @@ const schema = yup.object().shape({
         }),
 });
 
+const isObjectEmpty = (objectName) => {
+    return (
+        objectName &&
+        Object.keys(objectName).length === 0 &&
+        objectName.constructor === Object
+    );
+};
+
 onMounted(() => {
     let schowMonths = 2;
     if (window.innerWidth < 724) {
@@ -572,6 +580,11 @@ function onSubmitForm(values) {
                                 name="phone_number"
                                 placeholder=""
                                 v-model.lazy="formData.phone_number"
+                                :class="
+                                    form?.errors?.phone_number
+                                        ? 'form-input-error'
+                                        : ''
+                                "
                             />
                             <ErrorMessage name="phone_number" />
                         </div>
@@ -594,6 +607,19 @@ function onSubmitForm(values) {
                     </div>
                 </div>
             </div>
+
+            <div
+                v-if="!isObjectEmpty(form?.errors)"
+                class="form-error-container"
+            >
+                <div class="form-error-text">
+                    Beim Senden des Formulars ist ein Fehler aufgetreten!
+                </div>
+                <div class="form-error-tipp">
+                    Die ungültigen Felder wurden hervorgehoben.
+                </div>
+            </div>
+
             <div class="button-container">
                 <button class="button-primary" id="btnSubmit" type="submit">
                     Anfrage absenden
