@@ -23,6 +23,8 @@ import flatpickr from "flatpickr";
 import { German } from "flatpickr/dist/l10n/de.js";
 import "flatpickr/dist/themes/light.css";
 
+import countries from "./countries.json";
+
 configure({
     validateOnBlur: false,
     validateOnChange: false,
@@ -37,7 +39,19 @@ const formData = ref({
     datebirth_date1: undefined,
     datebirth_month1: "",
     datebirth_year1: undefined,
+    first_name: "",
+    last_name: "",
+    gender: "",
+    email: "",
+    country: "",
+    zip: "",
+    city: "",
+    street: "",
+    phone_number: "",
+    questions_wishes: "",
 });
+
+const emailRegExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const schema = yup.object().shape({
     travel_period: yup
@@ -63,6 +77,26 @@ const schema = yup.object().shape({
         .number()
         .required("Geben Sie ein Jahr ein.")
         .typeError("Geben Sie ein Jahr ein."),
+    first_name: yup.string().required("Geben Sie einen gültigen Vornamen ein."),
+    last_name: yup.string().required("Geben Sie einen gültigen Nachnamen ein."),
+    gender: yup.string().required("Fülle dieses Feld aus."),
+    email: yup
+        .string()
+        .email()
+        .matches(emailRegExp, "Geben Sie eine gültige E-Mail-Adresse ein.")
+        .required("Geben Sie eine gültige E-Mail-Adresse ein."),
+    country: yup.string().required("Fülle dieses Feld aus."),
+    zip: yup.string().required("Geben Sie einen gültigen PLZ ein."),
+    city: yup.string().required("Geben Sie eine gültige Stadt ein."),
+    street: yup.string().required("Geben Sie eine gültige Straße ein."),
+    phone_number: yup
+        .string()
+        .test("phone_number", "Phone number is not valid", (str) => {
+            if (!str) {
+                return true;
+            }
+            return /^\+?\d[\d{6,15},\s,-]*$/.test(str);
+        }),
 });
 
 onMounted(() => {
@@ -338,6 +372,226 @@ function onSubmitForm(values) {
                     <button type="button" class="btn-decrease">
                         Kind entfernen
                     </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-group-title">Ihre Kontaktdaten</div>
+                <div class="form-group-container">
+                    <div class="form-row">
+                        <label class="form-row-label" for="firstname"
+                            >Vorname *</label
+                        >
+                        <div class="form-row-container">
+                            <Field
+                                type="text"
+                                id="firstname"
+                                name="first_name"
+                                v-model="formData.first_name"
+                                required
+                                data-input
+                                :class="
+                                    form?.errors?.first_name
+                                        ? 'form-input-error'
+                                        : ''
+                                "
+                            />
+                            <ErrorMessage name="first_name" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row-label" for="lastname"
+                            >Nachname *</label
+                        >
+                        <div class="form-row-container">
+                            <Field
+                                type="text"
+                                id="lastname"
+                                name="last_name"
+                                v-model="formData.last_name"
+                                required
+                                data-input
+                                :class="
+                                    form?.errors?.last_name
+                                        ? 'form-input-error'
+                                        : ''
+                                "
+                            />
+                            <ErrorMessage name="last_name" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row-label" for="gender"
+                            >Geschlecht *</label
+                        >
+                        <div class="form-row-container">
+                            <Field
+                                as="select"
+                                id="gender"
+                                name="gender"
+                                v-model="formData.gender"
+                                required
+                                :class="
+                                    form?.errors?.gender
+                                        ? 'form-input-error'
+                                        : ''
+                                "
+                            >
+                                <option value="" disabled>Auswählen</option>
+                                <option value="men">Männlich</option>
+                                <option value="women">Weiblich</option>
+                            </Field>
+                            <ErrorMessage name="gender" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row-label" for="email"
+                            >E-Mail *</label
+                        >
+                        <div class="form-row-container">
+                            <Field
+                                type="text"
+                                id="email"
+                                name="email"
+                                placeholder=""
+                                v-model.lazy="formData.email"
+                                required
+                                :class="
+                                    form?.errors?.email
+                                        ? 'form-input-error'
+                                        : ''
+                                "
+                            />
+                            <ErrorMessage name="email" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row-label" for="country"
+                            >Land *</label
+                        >
+                        <div class="form-row-container">
+                            <Field
+                                as="select"
+                                id="country"
+                                name="country"
+                                placeholder=""
+                                v-model.lazy="formData.country"
+                                required
+                                :class="
+                                    form?.errors?.country
+                                        ? 'form-input-error'
+                                        : ''
+                                "
+                            >
+                                <option value="" disabled>Auswählen</option>
+                                <option key="DE" value="Duetschland">
+                                    Duetschland
+                                </option>
+                                <option key="AT" value="Österreich">
+                                    Österreich
+                                </option>
+                                <option key="CH" value="Duetschland">
+                                    Schweiz
+                                </option>
+                                <option value="" disabled>
+                                    ----------------------------------------
+                                </option>
+                                <option
+                                    v-for="(country, index) in countries"
+                                    :key="index"
+                                    :value="country"
+                                >
+                                    {{ country }}
+                                </option>
+                            </Field>
+                            <ErrorMessage name="country" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row-label" for="zip">PLZ *</label>
+                        <div class="form-row-container">
+                            <Field
+                                type="text"
+                                id="zip"
+                                name="zip"
+                                placeholder=""
+                                v-model.lazy="formData.zip"
+                                required
+                                :class="
+                                    form?.errors?.zip ? 'form-input-error' : ''
+                                "
+                            />
+                            <ErrorMessage name="zip" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row-label" for="city">Stadt *</label>
+                        <div class="form-row-container">
+                            <Field
+                                type="text"
+                                id="city"
+                                name="city"
+                                placeholder=""
+                                v-model.lazy="formData.city"
+                                required
+                                :class="
+                                    form?.errors?.city ? 'form-input-error' : ''
+                                "
+                            />
+                            <ErrorMessage name="city" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row-label" for="street"
+                            >Straße *</label
+                        >
+                        <div class="form-row-container">
+                            <Field
+                                type="text"
+                                id="street"
+                                name="street"
+                                placeholder=""
+                                v-model.lazy="formData.street"
+                                required
+                                :class="
+                                    form?.errors?.street
+                                        ? 'form-input-error'
+                                        : ''
+                                "
+                            />
+                            <ErrorMessage name="street" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row-label" for="phone"
+                            >Telefon</label
+                        >
+                        <div class="form-row-container">
+                            <Field
+                                type="text"
+                                id="phone"
+                                name="phone_number"
+                                placeholder=""
+                                v-model.lazy="formData.phone_number"
+                            />
+                            <ErrorMessage name="phone_number" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-row-label" for="questions_wishes"
+                            >Fragen oder Wünsche</label
+                        >
+                        <div class="form-row-container">
+                            <Field
+                                as="textarea"
+                                id="questions_wishes"
+                                name="questions_wishes"
+                                placeholder=""
+                                v-model.lazy="formData.questions_wishes"
+                                rows="4"
+                            />
+                            <ErrorMessage name="questions_wishes" />
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="button-container">
