@@ -16,13 +16,7 @@ const MONTHS = [
 const START_YEAR = 1920;
 const CURRENT_YEAR = new Date().getFullYear();
 
-import {
-    Form,
-    Field,
-    FieldArray,
-    ErrorMessage,
-    configure,
-} from "vee-validate";
+import { Form, Field, FieldArray, ErrorMessage, configure } from "vee-validate";
 import * as yup from "yup";
 import { onMounted, ref } from "vue";
 import flatpickr from "flatpickr";
@@ -129,7 +123,7 @@ const isObjectEmpty = (objectName) => {
 
 onMounted(() => {
     let schowMonths = 2;
-    if (window.innerWidth < 724) {
+    if (window.innerWidth < 650) {
         schowMonths = 1;
     }
 
