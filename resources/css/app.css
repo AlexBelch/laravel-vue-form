@@ -38,6 +38,10 @@
 :root {
     --beige: #f9f6f1;
     --red: #aa2e24;
+    --border-red-error: #bb1238;
+    --calendar-text-harvest-gold: #e6ba68;
+    --calendar-start-end-day-rob-roy: #e3b256;
+    --calendar-range-day-peach-yellow: #f6deae;
 }
 
 html {
@@ -104,13 +108,12 @@ body {
                             -webkit-appearance: none;
                             -moz-appearance: none;
                             appearance: none;
-                            background-color: #fff;
+                            background-color: white;
                             border-width: 1px;
                             padding-top: 0.5rem;
                             padding-right: 0.75rem;
                             padding-bottom: 0.5rem;
                             padding-left: 0.75rem;
-                            font-size: 1rem;
                             line-height: 1.5rem;
                         }
 
@@ -139,6 +142,7 @@ body {
                         textarea,
                         select {
                             font-family: var(--font-family-bodytext);
+                            font-size: var(--font-size-bodytext-desktop);
                             width: 100%;
                             border-radius: 5px;
                             border-color: lightgray;
@@ -152,7 +156,7 @@ body {
                         }
 
                         .form-input-error {
-                            border-color: #bb1238;
+                            border-color: var(--border-red-error);
                             border-width: medium;
                         }
 
@@ -238,7 +242,7 @@ body {
         }
 
         .form-error-container {
-            background-color: #bb1238;
+            background-color: var(--border-red-error);
             color: white;
             text-align: center;
             padding: 24px;
@@ -263,7 +267,7 @@ body {
             justify-content: center;
 
             .button-primary {
-                font-family: "Overlock";
+                font-family: var(--font-family-bodytext);
                 font-size: 14px;
                 font-weight: bold;
                 text-transform: uppercase;
@@ -305,13 +309,13 @@ body {
 
             .cur-month,
             .cur-year {
-                color: #e6ba68;
+                color: var(--calendar-text-harvest-gold);
             }
 
             .flatpickr-current-month {
                 .flatpickr-monthDropdown-months {
                     background: white;
-                    color: #e6ba68;
+                    color: var(--calendar-text-harvest-gold);
 
                     .flatpickr-monthDropdown-month {
                         background-color: white;
@@ -337,26 +341,26 @@ body {
         .flatpickr-days {
             .startRange,
             .endRange {
-                background-color: #e3b256;
-                border-color: #e3b256;
+                background-color: var(--calendar-start-end-day-rob-roy);
+                border-color: var(--calendar-start-end-day-rob-roy);
             }
 
             .inRange {
-                background-color: #f6deae;
-                border-color: #f6deae;
+                background-color: var(--calendar-range-day-peach-yellow);
+                border-color: var(--calendar-range-day-peach-yellow);
                 -webkit-box-shadow:
-                    -5px 0 0 #f6deae,
-                    5px 0 0 #f6deae;
+                    -5px 0 0 var(--calendar-range-day-peach-yellow),
+                    5px 0 0 var(--calendar-range-day-peach-yellow);
                 box-shadow:
-                    -5px 0 0 #f6deae,
-                    5px 0 0 #f6deae;
+                    -5px 0 0 var(--calendar-range-day-peach-yellow),
+                    5px 0 0 var(--calendar-range-day-peach-yellow);
             }
 
             .flatpickr-day:hover,
             .flatpickr-day:focus {
                 background-color: white;
-                border: 1px solid #e6ba68;
-                color: #e6ba68;
+                border: 1px solid var(--calendar-text-harvest-gold);
+                color: var(--calendar-text-harvest-gold);
             }
 
             .flatpickr-day.selected.startRange
@@ -365,8 +369,9 @@ body {
                 + .endRange:not(:nth-child(7n + 1)),
             .flatpickr-day.endRange.startRange
                 + .endRange:not(:nth-child(7n + 1)) {
-                -webkit-box-shadow: -10px 0 0 #e3b256;
-                box-shadow: -10px 0 0 #e3b256;
+                -webkit-box-shadow: -10px 0 0
+                    var(--calendar-start-end-day-rob-roy);
+                box-shadow: -10px 0 0 var(--calendar-start-end-day-rob-roy);
                 border: none;
             }
         }
@@ -377,11 +382,11 @@ body {
         .dayContainer:nth-child(n + 2)
         .flatpickr-day.inRange:nth-child(7n + 1) {
         -webkit-box-shadow:
-            -2px 0 0 #f6deae,
-            5px 0 0 #f6deae;
+            -2px 0 0 var(--calendar-range-day-peach-yellow),
+            5px 0 0 var(--calendar-range-day-peach-yellow);
         box-shadow:
-            -2px 0 0 #f6deae,
-            5px 0 0 #f6deae;
+            -2px 0 0 var(--calendar-range-day-peach-yellow),
+            5px 0 0 var(--calendar-range-day-peach-yellow);
         border: none;
     }
 }
@@ -423,10 +428,30 @@ body {
                         .form-row-label {
                             font-size: var(--font-size-bodytext-mobile);
                         }
+
+                        .form-row-container {
+                            input,
+                            textarea,
+                            select {
+                                font-size: var(--font-size-bodytext-mobile);
+                            }
+                        }
                     }
                 }
             }
 
+            .form-error-container {
+                .form-error-text {
+                    font-size: var(--font-size-bodytext-mobile);
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 385px) {
+    body {
+        .form-traver-wrap {
             .form-row-kinder-links-container {
                 align-items: center;
             }
