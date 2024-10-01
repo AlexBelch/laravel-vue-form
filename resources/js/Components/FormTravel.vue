@@ -16,13 +16,7 @@ const MONTHS = [
 const START_YEAR = 1920;
 const CURRENT_YEAR = new Date().getFullYear();
 
-import {
-    Form,
-    Field,
-    FieldArray,
-    ErrorMessage,
-    configure,
-} from "vee-validate";
+import { Form, Field, FieldArray, ErrorMessage, configure } from "vee-validate";
 import * as yup from "yup";
 import { onMounted, ref } from "vue";
 import flatpickr from "flatpickr";
@@ -72,7 +66,7 @@ const emailRegExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const schema = yup.object().shape({
     travel_period: yup
         .string()
-        .required("Geben Sie eine Periodzeit")
+        .required("Füllen Sie dieses Feld aus.")
         .min(25)
         .max(25),
     number_adults: yup
@@ -85,27 +79,27 @@ const schema = yup.object().shape({
             name: yup.string().required("Geben Sie eine Name ein."),
             datebirth_date: yup
                 .number()
-                .required("Geben Sie ein Tag ein.")
-                .typeError("Geben Sie ein Tag ein."),
+                .required("Füllen Sie ein Tag aus.")
+                .typeError("Füllen Sie ein Tag aus."),
             datebirth_month: yup
                 .number()
-                .required("Geben Sie ein Monat ein.")
-                .typeError("Geben Sie ein Monat ein."),
+                .required("Füllen Sie ein Monat aus.")
+                .typeError("Füllen Sie ein Monat aus."),
             datebirth_year: yup
                 .number()
-                .required("Geben Sie ein Jahr ein.")
-                .typeError("Geben Sie ein Jahr ein."),
+                .required("Füllen Sie ein Jahr aus.")
+                .typeError("Füllen Sie ein Jahr aus."),
         }),
     ),
     first_name: yup.string().required("Geben Sie einen gültigen Vornamen ein."),
     last_name: yup.string().required("Geben Sie einen gültigen Nachnamen ein."),
-    gender: yup.string().required("Fülle dieses Feld aus."),
+    gender: yup.string().required("Füllen Sie dieses Feld aus."),
     email: yup
         .string()
-        .email()
-        .matches(emailRegExp, "Geben Sie eine gültige E-Mail-Adresse ein.")
-        .required("Geben Sie eine gültige E-Mail-Adresse ein."),
-    country: yup.string().required("Fülle dieses Feld aus."),
+        .email("Geben Sie eine gültige E-Mail-Adresse ein.")
+        .required("Geben Sie eine gültige E-Mail-Adresse ein.")
+        .matches(emailRegExp, "Geben Sie eine gültige E-Mail-Adresse ein."),
+    country: yup.string().required("Füllen Sie dieses Feld aus."),
     zip: yup.string().required("Geben Sie einen gültigen PLZ ein."),
     city: yup.string().required("Geben Sie eine gültige Stadt ein."),
     street: yup.string().required("Geben Sie eine gültige Straße ein."),
@@ -129,7 +123,7 @@ const isObjectEmpty = (objectName) => {
 
 onMounted(() => {
     let schowMonths = 2;
-    if (window.innerWidth < 724) {
+    if (window.innerWidth < 650) {
         schowMonths = 1;
     }
 
