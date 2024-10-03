@@ -31,10 +31,11 @@ configure({
     validateOnChange: false,
 });
 
-const form = ref(null);
+//var for set unique id for object(child) in array childrens
 let id = 2;
+
 // initial data fields of form
-const formData = ref({
+const initialValues = ref({
     travel_period: "",
     number_adults: undefined,
     childrens: [
@@ -81,7 +82,7 @@ const schema = yup.object().shape({
         .required("Geben Sie eine positive Zahl ein.")
         .typeError("Geben Sie eine positive Zahl ein."),
     childrens: yup.array().of(
-        yup.object({
+        yup.object().shape({
             name: yup.string().required("Geben Sie eine Name ein."),
             datebirth_date: yup
                 .number()
@@ -127,8 +128,9 @@ const isObjectEmpty = (objectName) => {
         objectName.constructor === Object
     );
 };
-
+// var for element flatpickr
 let flatpickrEl = null;
+
 // initialize the calendar when the component is mounted
 onMounted(() => {
     let schowMonths = 2;
@@ -145,14 +147,10 @@ onMounted(() => {
     });
 });
 
-const resetForm = () => {
-    form.value.resetForm();
-    flatpickrEl.clear();
-};
-
-function onSubmitForm(values) {
+function onSubmitForm(values, { resetForm }) {
     console.log(values);
     resetForm();
+    flatpickrEl.clear();
 }
 
 function onInvalidSubmit({ values, errors, results }) {
@@ -162,33 +160,17 @@ function onInvalidSubmit({ values, errors, results }) {
 
     document.getElementById("btnSubmit")?.scrollIntoView();
 }
-
-// adding fields for a child
-function addChild(formData) {
-    formData?.childrens?.push({
-        id: id,
-        name: "",
-        datebirth_date: undefined,
-        datebirth_month: "",
-        datebirth_year: undefined,
-    });
-    id++;
-}
-// remove last child from array
-function removeChild(formData) {
-    formData?.childrens?.pop();
-}
 </script>
 
 <template>
     <div class="form-traver-wrap">
         <!-- creating a form using the vee-validate library -->
         <Form
-            ref="form"
             :validation-schema="schema"
-            :initial-values="formData"
+            :initial-values="initialValues"
             @submit="onSubmitForm"
             @invalid-submit="onInvalidSubmit"
+            v-slot="{ values, errors }"
         >
             <!-- creating the first field group -->
             <div class="form-group">
@@ -206,9 +188,8 @@ function removeChild(formData) {
                                 type="text"
                                 id="travelperiod"
                                 name="travel_period"
-                                v-model="formData.travel_period"
                                 :class="
-                                    form?.errors?.travel_period
+                                    errors?.travel_period
                                         ? 'form-input-error'
                                         : ''
                                 "
@@ -310,10 +291,8 @@ function removeChild(formData) {
                                 type="text"
                                 id="numberadults"
                                 name="number_adults"
-                                placeholder=""
-                                v-model.lazy="formData.number_adults"
                                 :class="
-                                    form?.errors?.number_adults
+                                    errors?.number_adults
                                         ? 'form-input-error'
                                         : ''
                                 "
@@ -336,11 +315,11 @@ function removeChild(formData) {
                     Kindes an.
                 </div>
                 <!-- creating dynamic fields from array fields children using the vee-validate library -->
-                <FieldArray name="childrens">
+                <FieldArray name="childrens" v-slot="{ fields, push, remove }">
                     <div
                         class="form-group-container"
-                        v-for="(children, idx) in formData.childrens"
-                        :key="children.id"
+                        v-for="(entry, idx) in fields"
+                        :key="entry.key"
                     >
                         <div class="form-row">
                             <label
@@ -354,9 +333,8 @@ function removeChild(formData) {
                                     type="text"
                                     :id="`childrens[${idx}].name`"
                                     :name="`childrens[${idx}].name`"
-                                    v-model.lazy="formData.childrens[idx].name"
                                     :class="
-                                        form?.errors?.[`childrens[${idx}].name`]
+                                        errors?.[`childrens[${idx}].name`]
                                             ? 'form-input-error'
                                             : ''
                                     "
@@ -382,12 +360,8 @@ function removeChild(formData) {
                                             as="select"
                                             :id="`childrens[${idx}].datebirth_date`"
                                             :name="`childrens[${idx}].datebirth_date`"
-                                            v-model.lazy="
-                                                formData.childrens[idx]
-                                                    .datebirth_date
-                                            "
                                             :class="
-                                                form?.errors?.[
+                                                errors?.[
                                                     `childrens[${idx}].datebirth_date`
                                                 ]
                                                     ? 'form-input-error'
@@ -416,12 +390,8 @@ function removeChild(formData) {
                                         <Field
                                             as="select"
                                             :name="`childrens[${idx}].datebirth_month`"
-                                            v-model.lazy="
-                                                formData.childrens[idx]
-                                                    .datebirth_month
-                                            "
                                             :class="
-                                                form?.errors?.[
+                                                errors?.[
                                                     `childrens[${idx}].datebirth_month`
                                                 ]
                                                     ? 'form-input-error'
@@ -450,12 +420,8 @@ function removeChild(formData) {
                                         <Field
                                             as="select"
                                             :name="`childrens[${idx}].datebirth_year`"
-                                            v-model.lazy="
-                                                formData.childrens[idx]
-                                                    .datebirth_year
-                                            "
                                             :class="
-                                                form?.errors?.[
+                                                errors?.[
                                                     `childrens[${idx}].datebirth_year`
                                                 ]
                                                     ? 'form-input-error'
@@ -485,25 +451,36 @@ function removeChild(formData) {
                             </div>
                         </div>
                     </div>
+
+                    <!-- creating buttons for add/remove child  -->
+                    <div class="form-row-kinder-links-container">
+                        <button
+                            @click="
+                                push({
+                                    id: id,
+                                    name: '',
+                                    datebirth_date: undefined,
+                                    datebirth_month: '',
+                                    datebirth_year: undefined,
+                                });
+
+                                id++;
+                            "
+                            type="button"
+                            class="btn-increase"
+                        >
+                            Kind hinzufügen
+                        </button>
+                        <span>&#8594;</span>
+                        <button
+                            @click="remove(fields.length - 1)"
+                            type="button"
+                            class="btn-decrease"
+                        >
+                            Kind entfernen
+                        </button>
+                    </div>
                 </FieldArray>
-                <!-- creating buttons for add/remove child  -->
-                <div class="form-row-kinder-links-container">
-                    <button
-                        @click="addChild(formData)"
-                        type="button"
-                        class="btn-increase"
-                    >
-                        Kind hinzufügen
-                    </button>
-                    <span>&#8594;</span>
-                    <button
-                        @click="removeChild(formData)"
-                        type="button"
-                        class="btn-decrease"
-                    >
-                        Kind entfernen
-                    </button>
-                </div>
             </div>
             <div class="form-group">
                 <div class="form-group-title">Ihre Kontaktdaten</div>
@@ -518,11 +495,8 @@ function removeChild(formData) {
                                 type="text"
                                 id="firstname"
                                 name="first_name"
-                                v-model="formData.first_name"
                                 :class="
-                                    form?.errors?.first_name
-                                        ? 'form-input-error'
-                                        : ''
+                                    errors?.first_name ? 'form-input-error' : ''
                                 "
                                 required
                             />
@@ -540,11 +514,8 @@ function removeChild(formData) {
                                 type="text"
                                 id="lastname"
                                 name="last_name"
-                                v-model="formData.last_name"
                                 :class="
-                                    form?.errors?.last_name
-                                        ? 'form-input-error'
-                                        : ''
+                                    errors?.last_name ? 'form-input-error' : ''
                                 "
                                 required
                             />
@@ -562,11 +533,8 @@ function removeChild(formData) {
                                 as="select"
                                 id="gender"
                                 name="gender"
-                                v-model="formData.gender"
                                 :class="
-                                    form?.errors?.gender
-                                        ? 'form-input-error'
-                                        : ''
+                                    errors?.gender ? 'form-input-error' : ''
                                 "
                                 required
                             >
@@ -588,12 +556,7 @@ function removeChild(formData) {
                                 type="email"
                                 id="email"
                                 name="email"
-                                v-model.lazy="formData.email"
-                                :class="
-                                    form?.errors?.email
-                                        ? 'form-input-error'
-                                        : ''
-                                "
+                                :class="errors?.email ? 'form-input-error' : ''"
                                 required
                             />
                             <!-- creating a field for dispaly a text error -->
@@ -610,11 +573,8 @@ function removeChild(formData) {
                                 as="select"
                                 id="country"
                                 name="country"
-                                v-model.lazy="formData.country"
                                 :class="
-                                    form?.errors?.country
-                                        ? 'form-input-error'
-                                        : ''
+                                    errors?.country ? 'form-input-error' : ''
                                 "
                                 required
                             >
@@ -651,10 +611,7 @@ function removeChild(formData) {
                                 type="text"
                                 id="zip"
                                 name="zip"
-                                v-model.lazy="formData.zip"
-                                :class="
-                                    form?.errors?.zip ? 'form-input-error' : ''
-                                "
+                                :class="errors?.zip ? 'form-input-error' : ''"
                                 required
                             />
                             <!-- creating a field for dispaly a text error -->
@@ -669,10 +626,7 @@ function removeChild(formData) {
                                 type="text"
                                 id="city"
                                 name="city"
-                                v-model.lazy="formData.city"
-                                :class="
-                                    form?.errors?.city ? 'form-input-error' : ''
-                                "
+                                :class="errors?.city ? 'form-input-error' : ''"
                                 required
                             />
                             <!-- creating a field for dispaly a text error -->
@@ -689,11 +643,8 @@ function removeChild(formData) {
                                 type="text"
                                 id="street"
                                 name="street"
-                                v-model.lazy="formData.street"
                                 :class="
-                                    form?.errors?.street
-                                        ? 'form-input-error'
-                                        : ''
+                                    errors?.street ? 'form-input-error' : ''
                                 "
                                 required
                             />
@@ -711,9 +662,8 @@ function removeChild(formData) {
                                 type="tel"
                                 id="phone"
                                 name="phone_number"
-                                v-model.lazy="formData.phone_number"
                                 :class="
-                                    form?.errors?.phone_number
+                                    errors?.phone_number
                                         ? 'form-input-error'
                                         : ''
                                 "
@@ -722,7 +672,6 @@ function removeChild(formData) {
                             <ErrorMessage name="phone_number" />
                         </div>
                     </div>
-                    <div>{{ formData }}</div>
                     <div class="form-row">
                         <label class="form-row-label" for="questions_wishes"
                             >Fragen oder Wünsche</label
@@ -733,7 +682,6 @@ function removeChild(formData) {
                                 as="textarea"
                                 id="questions_wishes"
                                 name="questions_wishes"
-                                v-model.lazy="formData.questions_wishes"
                                 rows="4"
                             />
                         </div>
@@ -741,10 +689,7 @@ function removeChild(formData) {
                 </div>
             </div>
             <!-- display error block if object form.errors is not empty -->
-            <div
-                v-if="!isObjectEmpty(form?.errors)"
-                class="form-error-container"
-            >
+            <div v-if="!isObjectEmpty(errors)" class="form-error-container">
                 <div class="form-error-text">
                     Beim Senden des Formulars ist ein Fehler aufgetreten!
                 </div>
