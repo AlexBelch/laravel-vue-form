@@ -141,6 +141,7 @@ onMounted(() => {
     flatpickrEl = flatpickr(".flatpickr", {
         mode: "range",
         minDate: "today",
+        dateFormat: "d. M Y",
         locale: German,
         showMonths: schowMonths, //need change for resize window
         wrap: true,
