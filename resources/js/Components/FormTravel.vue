@@ -25,24 +25,28 @@ import "flatpickr/dist/themes/light.css";
 
 import countries from "./countries.json";
 
+// disabling validation after changes and loss of focus
 configure({
     validateOnBlur: false,
     validateOnChange: false,
 });
 
 const form = ref(null);
-
+let id = 2;
+// initial data fields of form
 const formData = ref({
     travel_period: "",
     number_adults: undefined,
     childrens: [
         {
+            id: 0,
             name: "",
             datebirth_date: undefined,
             datebirth_month: "",
             datebirth_year: undefined,
         },
         {
+            id: 1,
             name: "",
             datebirth_date: undefined,
             datebirth_month: "",
@@ -61,8 +65,10 @@ const formData = ref({
     questions_wishes: "",
 });
 
+// regular expression for email verification
 const emailRegExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
+// creating a validation scheme based on the yup library
 const schema = yup.object().shape({
     travel_period: yup
         .string()
@@ -113,6 +119,7 @@ const schema = yup.object().shape({
         }),
 });
 
+// function to check for empty object
 const isObjectEmpty = (objectName) => {
     return (
         objectName &&
@@ -121,13 +128,15 @@ const isObjectEmpty = (objectName) => {
     );
 };
 
+let flatpickrEl = null;
+// initialize the calendar when the component is mounted
 onMounted(() => {
     let schowMonths = 2;
     if (window.innerWidth < 650) {
         schowMonths = 1;
     }
 
-    flatpickr(".flatpickr", {
+    flatpickrEl = flatpickr(".flatpickr", {
         mode: "range",
         minDate: "today",
         locale: German,
@@ -138,6 +147,7 @@ onMounted(() => {
 
 const resetForm = () => {
     form.value.resetForm();
+    flatpickrEl.clear();
 };
 
 function onSubmitForm(values) {
@@ -153,15 +163,18 @@ function onInvalidSubmit({ values, errors, results }) {
     document.getElementById("btnSubmit")?.scrollIntoView();
 }
 
+// adding fields for a child
 function addChild(formData) {
     formData?.childrens?.push({
+        id: id,
         name: "",
         datebirth_date: undefined,
         datebirth_month: "",
         datebirth_year: undefined,
     });
+    id++;
 }
-
+// remove last child from array
 function removeChild(formData) {
     formData?.childrens?.pop();
 }
@@ -169,12 +182,15 @@ function removeChild(formData) {
 
 <template>
     <div class="form-traver-wrap">
+        <!-- creating a form using the vee-validate library -->
         <Form
             ref="form"
             :validation-schema="schema"
+            :initial-values="formData"
             @submit="onSubmitForm"
             @invalid-submit="onInvalidSubmit"
         >
+            <!-- creating the first field group -->
             <div class="form-group">
                 <div class="form-group-title sansita-swashed-regular">
                     Ihre Urlaubsdaten
@@ -184,6 +200,7 @@ function removeChild(formData) {
                         <label class="form-row-label" for="travelperiod"
                             >Reisezeitraum *</label
                         >
+                        <!-- creating a field calendar using the vee-validate, flatpickr libraries -->
                         <div class="flatpickr form-row-container">
                             <Field
                                 type="text"
@@ -279,6 +296,7 @@ function removeChild(formData) {
                                     </g>
                                 </svg>
                             </a>
+                            <!-- creating a field for dispaly a text error -->
                             <ErrorMessage name="travel_period" />
                         </div>
                     </div>
@@ -286,6 +304,7 @@ function removeChild(formData) {
                         <label class="form-row-label" for="numberadults"
                             >Anzahl Erwachsene *</label
                         >
+                        <!-- creating a field text using the vee-validate library -->
                         <div class="form-row-container">
                             <Field
                                 type="text"
@@ -302,6 +321,7 @@ function removeChild(formData) {
                                 min="1"
                                 pattern="\d+"
                             />
+                            <!-- creating a field for dispaly a text error -->
                             <ErrorMessage name="number_adults" />
                         </div>
                     </div>
@@ -315,12 +335,12 @@ function removeChild(formData) {
                     uns daher den Vornamen und Das Alter Ihrer Kinder/Ihres
                     Kindes an.
                 </div>
-
+                <!-- creating dynamic fields from array fields children using the vee-validate library -->
                 <FieldArray name="childrens">
                     <div
                         class="form-group-container"
                         v-for="(children, idx) in formData.childrens"
-                        :key="children.key"
+                        :key="children.id"
                     >
                         <div class="form-row">
                             <label
@@ -329,6 +349,7 @@ function removeChild(formData) {
                                 >Name des Kindes *</label
                             >
                             <div class="form-row-container">
+                                <!-- creating text field using the vee-validate library -->
                                 <Field
                                     type="text"
                                     :id="`childrens[${idx}].name`"
@@ -341,6 +362,7 @@ function removeChild(formData) {
                                     "
                                     required
                                 />
+                                <!-- creating a field for dispaly a text error -->
                                 <ErrorMessage
                                     :name="`childrens[${idx}].name`"
                                 />
@@ -355,6 +377,7 @@ function removeChild(formData) {
                             <div class="form-row-container">
                                 <div class="form-row-date-container">
                                     <div class="form-row-date-field-wrap">
+                                        <!-- creating select field using the vee-validate library -->
                                         <Field
                                             as="select"
                                             :id="`childrens[${idx}].datebirth_date`"
@@ -383,11 +406,13 @@ function removeChild(formData) {
                                                 {{ n }}
                                             </option>
                                         </Field>
+                                        <!-- creating a field for dispaly a text error -->
                                         <ErrorMessage
                                             :name="`childrens[${idx}].datebirth_date`"
                                         />
                                     </div>
                                     <div class="form-row-date-field-wrap">
+                                        <!-- creating select field using the vee-validate library -->
                                         <Field
                                             as="select"
                                             :name="`childrens[${idx}].datebirth_month`"
@@ -415,11 +440,13 @@ function removeChild(formData) {
                                                 {{ month }}
                                             </option>
                                         </Field>
+                                        <!-- creating a field for dispaly a text error -->
                                         <ErrorMessage
                                             :name="`childrens[${idx}].datebirth_month`"
                                         />
                                     </div>
                                     <div class="form-row-date-field-wrap">
+                                        <!-- creating select field using the vee-validate library -->
                                         <Field
                                             as="select"
                                             :name="`childrens[${idx}].datebirth_year`"
@@ -449,6 +476,7 @@ function removeChild(formData) {
                                                 {{ CURRENT_YEAR - year + 1 }}
                                             </option>
                                         </Field>
+                                        <!-- creating a field for dispaly a text error -->
                                         <ErrorMessage
                                             :name="`childrens[${idx}].datebirth_year`"
                                         />
@@ -458,7 +486,7 @@ function removeChild(formData) {
                         </div>
                     </div>
                 </FieldArray>
-
+                <!-- creating buttons for add/remove child  -->
                 <div class="form-row-kinder-links-container">
                     <button
                         @click="addChild(formData)"
@@ -485,6 +513,7 @@ function removeChild(formData) {
                             >Vorname *</label
                         >
                         <div class="form-row-container">
+                            <!-- creating text field using the vee-validate library -->
                             <Field
                                 type="text"
                                 id="firstname"
@@ -497,6 +526,7 @@ function removeChild(formData) {
                                 "
                                 required
                             />
+                            <!-- creating a field for dispaly a text error -->
                             <ErrorMessage name="first_name" />
                         </div>
                     </div>
@@ -505,6 +535,7 @@ function removeChild(formData) {
                             >Nachname *</label
                         >
                         <div class="form-row-container">
+                            <!-- creating text field using the vee-validate library -->
                             <Field
                                 type="text"
                                 id="lastname"
@@ -517,6 +548,7 @@ function removeChild(formData) {
                                 "
                                 required
                             />
+                            <!-- creating a field for dispaly a text error -->
                             <ErrorMessage name="last_name" />
                         </div>
                     </div>
@@ -525,6 +557,7 @@ function removeChild(formData) {
                             >Geschlecht *</label
                         >
                         <div class="form-row-container">
+                            <!-- creating select field using the vee-validate library -->
                             <Field
                                 as="select"
                                 id="gender"
@@ -541,6 +574,7 @@ function removeChild(formData) {
                                 <option value="men">Männlich</option>
                                 <option value="women">Weiblich</option>
                             </Field>
+                            <!-- creating a field for dispaly a text error -->
                             <ErrorMessage name="gender" />
                         </div>
                     </div>
@@ -549,6 +583,7 @@ function removeChild(formData) {
                             >E-Mail *</label
                         >
                         <div class="form-row-container">
+                            <!-- creating email field using the vee-validate library -->
                             <Field
                                 type="email"
                                 id="email"
@@ -561,6 +596,7 @@ function removeChild(formData) {
                                 "
                                 required
                             />
+                            <!-- creating a field for dispaly a text error -->
                             <ErrorMessage name="email" />
                         </div>
                     </div>
@@ -569,6 +605,7 @@ function removeChild(formData) {
                             >Land *</label
                         >
                         <div class="form-row-container">
+                            <!-- creating select field using the vee-validate library -->
                             <Field
                                 as="select"
                                 id="country"
@@ -602,12 +639,14 @@ function removeChild(formData) {
                                     {{ country }}
                                 </option>
                             </Field>
+                            <!-- creating a field for dispaly a text error -->
                             <ErrorMessage name="country" />
                         </div>
                     </div>
                     <div class="form-row">
                         <label class="form-row-label" for="zip">PLZ *</label>
                         <div class="form-row-container">
+                            <!-- creating text field using the vee-validate library -->
                             <Field
                                 type="text"
                                 id="zip"
@@ -618,12 +657,14 @@ function removeChild(formData) {
                                 "
                                 required
                             />
+                            <!-- creating a field for dispaly a text error -->
                             <ErrorMessage name="zip" />
                         </div>
                     </div>
                     <div class="form-row">
                         <label class="form-row-label" for="city">Stadt *</label>
                         <div class="form-row-container">
+                            <!-- creating text field using the vee-validate library -->
                             <Field
                                 type="text"
                                 id="city"
@@ -634,6 +675,7 @@ function removeChild(formData) {
                                 "
                                 required
                             />
+                            <!-- creating a field for dispaly a text error -->
                             <ErrorMessage name="city" />
                         </div>
                     </div>
@@ -642,6 +684,7 @@ function removeChild(formData) {
                             >Straße *</label
                         >
                         <div class="form-row-container">
+                            <!-- creating text field using the vee-validate library -->
                             <Field
                                 type="text"
                                 id="street"
@@ -654,6 +697,7 @@ function removeChild(formData) {
                                 "
                                 required
                             />
+                            <!-- creating a field for dispaly a text error -->
                             <ErrorMessage name="street" />
                         </div>
                     </div>
@@ -662,6 +706,7 @@ function removeChild(formData) {
                             >Telefon</label
                         >
                         <div class="form-row-container">
+                            <!-- creating phone field using the vee-validate library -->
                             <Field
                                 type="tel"
                                 id="phone"
@@ -673,14 +718,17 @@ function removeChild(formData) {
                                         : ''
                                 "
                             />
+                            <!-- creating a field for dispaly a text error -->
                             <ErrorMessage name="phone_number" />
                         </div>
                     </div>
+                    <div>{{ formData }}</div>
                     <div class="form-row">
                         <label class="form-row-label" for="questions_wishes"
                             >Fragen oder Wünsche</label
                         >
                         <div class="form-row-container">
+                            <!-- creating textarea field using the vee-validate library -->
                             <Field
                                 as="textarea"
                                 id="questions_wishes"
@@ -688,12 +736,11 @@ function removeChild(formData) {
                                 v-model.lazy="formData.questions_wishes"
                                 rows="4"
                             />
-                            <ErrorMessage name="questions_wishes" />
                         </div>
                     </div>
                 </div>
             </div>
-
+            <!-- display error block if object form.errors is not empty -->
             <div
                 v-if="!isObjectEmpty(form?.errors)"
                 class="form-error-container"
@@ -705,7 +752,7 @@ function removeChild(formData) {
                     Die ungültigen Felder wurden hervorgehoben.
                 </div>
             </div>
-
+            <!-- main form button for validation/submission -->
             <div class="button-container">
                 <button class="button-primary" id="btnSubmit" type="submit">
                     Anfrage absenden
